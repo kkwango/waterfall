@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>瀑布流布局</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		/*flex布局下子元素等高，不可用*/
+		.container {
+			/*display: flex;*/
+			/*flex-wrap: wrap;
+			justify-content: center;*/
+			text-align: center;
+		}
+		.col {
+			/*flex: 1;*/
+			/*display: flex;
+			flex-direction: column;*/
+			display: inline-block;
+			vertical-align: top;
+		}
+		.pic {
+			padding: 10px;
+			border: 1px solid #ccc;
+			margin: 0 10px 20px 10px;
+			border-radius: 2px;
+			width: 192px;
+			position: relative;
+			overflow: hidden;
+		}
+		.pic:hover .title {
+			opacity: 1;
+		}
+		.pic:hover .mask {
+			box-shadow: 0 0 0 110px rgba(0,0,0,0.6) inset;
+		}
+		.title {
+			/*width: 100%;*/
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%,-50%);
+			transition: all 0.4s linear 0.2s;
+			color: #fff;
+			opacity: 0;
+		}
+		.mask {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			top: 0;
+			left: 0;
+			box-shadow: 0 0 0 0px rgba(0,0,0,0.4) inset;
+			transition: all 0.5s linear;
+		}
+		img {
+			width: 100%;
+		}
+	</style>
+</head>
+<body>
+	<div class="container"></div>
+</body>
+<script type="text/javascript">
+var waterfall = {
+	container: document.querySelector('.container'),
+	imgRoot: 'http://cued.xunlei.com/demos/publ/img/',
+	colW: 234,
+	imgIndex: 100,
+	colNum: 0,
+	// 判断列数并渲染
+	render: function() {
+		this.imgIndex = 100;
+		this.colNum = Math.floor(document.body.clientWidth/this.colW);
+		var tempHtml = '';
+		for(var i = 0;i< this.colNum;i++) {
+			var colHtml = '';
+			for(var j=0;j<5;j++) {
+				colHtml += '<div class="pic">\
+								<img src="'+this.imgRoot+'P_'+(this.imgIndex%160)+'.jpg">\
+								<div class="mask"></div>\
+								<div class="title">我是描述文字</div>\
+							</div>';
+				this.imgIndex++;
+			};
+			tempHtml += '<div class="col col'+(i+1)+'">'+colHtml+'</div>';
+		}
+		this.container.innerHTML = tempHtml;
+	},
+	// 判断是否滚动到最底部，并加载
+	scrollEndAppend: function() {
+		for(var i=0;i< this.colNum;i++) {
+			var ele = document.querySelector('.col'+(i+1));
+			if(ele.clientHeight < document.body.scrollTop+window.innerHeight-100) {
+				this.imgIndex = this.imgIndex%160>100 ? this.imgIndex%160 : this.imgIndex%160+100;
+				var div = document.createElement('div');
+				div.className = 'pic';
+				var img = document.createElement('img');
+				img.src = this.imgRoot+'P_'+this.imgIndex+'.jpg';
+				var mask = document.createElement('div');
+				mask.className = 'mask';
+				var title = document.createElement('div');
+				title.className = 'title';
+				title.innerHTML = '我是描述文字';
+				div.appendChild(img);
+				div.appendChild(mask);
+				div.appendChild(title);
+				ele.appendChild(div);
+				this.imgIndex++;
+			}
+		}
+	},
+	init: function() {
+		this.render();
+		var self = this;
+		window.onresize = this.render.bind(this);
+		window.onscroll = function() {
+			setTimeout(self.scrollEndAppend.bind(self),100);
+		}
+	}
+}
+waterfall.init();
+</script>
+</html> 
